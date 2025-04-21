@@ -101,33 +101,19 @@ async function loadModel() {
     }
 }
 
-// Improved EAR calculation using convex hull approach
+// Improved EAR calculation using direct indexing
 function calculateEAR(landmarks, eyeIndices) {
-    try {
-        // Get the eye landmarks - adapting to new format
-        const points = eyeIndices.map(index => {
-            const point = landmarks.find(lm => lm.name === `face_landmark_${index}`);
-            return point ? [point.x, point.y] : [0, 0];
-        });
-        
-        // Calculate vertical distances (average of multiple points for robustness)
-        const verticalDist1 = distance(points[1], points[7]);
-        const verticalDist2 = distance(points[2], points[10]);
-        const verticalDist3 = distance(points[3], points[9]);
-        
-        // Calculate horizontal distance
-        const horizontalDist = distance(points[0], points[5]);
-        
-        if (horizontalDist === 0) return 1.0; // Prevent division by zero
-        
-        // Calculate EAR (average of multiple vertical distances)
-        const ear = (verticalDist1 + verticalDist2 + verticalDist3) / (3 * horizontalDist);
-        
-        return ear;
-    } catch (error) {
-        console.error("EAR calculation error:", error);
-        return 1.0; // Return default value on error
-    }
+    // Directly index into the keypoints array for speed and reliability
+    const points = eyeIndices.map(idx => {
+        const lm = landmarks[idx];
+        return lm ? [lm.x, lm.y] : [0, 0];
+    });
+    const verticalDist1 = distance(points[1], points[7]);
+    const verticalDist2 = distance(points[2], points[10]);
+    const verticalDist3 = distance(points[3], points[9]);
+    const horizontalDist = distance(points[0], points[5]);
+    if (horizontalDist === 0) return 1.0;
+    return (verticalDist1 + verticalDist2 + verticalDist3) / (3 * horizontalDist);
 }
 
 // Calculate distance between two points
@@ -254,7 +240,7 @@ function updatePupilVisualization() {
 async function detectFace(model) {
     try {
         // Get predictions from the model - updated API call
-        const predictions = await model.estimateFaces(video);
+        const predictions = await model.estimateFaces(video, { flipHorizontal: false });
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
@@ -322,8 +308,9 @@ function drawFacialLandmarks(landmarks) {
 function drawEyeContour(landmarks, indices, isClosed) {
     ctx.beginPath();
     indices.forEach((index, i) => {
-        const point = landmarks.find(lm => lm.name === `face_landmark_${index}`);
-        const [x, y] = point ? [point.x, point.y] : [0, 0];
+        const lm = landmarks[index];
+        const x = lm ? lm.x : 0;
+        const y = lm ? lm.y : 0;
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
     });
