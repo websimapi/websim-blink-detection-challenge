@@ -81,13 +81,15 @@ function setupCanvas() {
 // Load TensorFlow.js model
 async function loadModel() {
     try {
-        // Update to use the latest model configuration
-        const model = await faceLandmarksDetection.load(
-            faceLandmarksDetection.SupportedPackages.mediapipeFacemesh,
+        // Fix: Use the correct API structure for loading the model
+        // The SupportedPackages.mediapipeFacemesh syntax is outdated
+        const model = await faceLandmarksDetection.createDetector(
+            faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh,
             { 
+                runtime: 'tfjs',
                 maxFaces: 1,
-                refineLandmarks: true, // Enable refined landmarks for better eye tracking
-                detectionConfidence: 0.8 // Increase detection confidence
+                refineLandmarks: true,
+                detectionConfidence: 0.8
             }
         );
         detectionActive = true;
@@ -102,8 +104,11 @@ async function loadModel() {
 // Improved EAR calculation using convex hull approach
 function calculateEAR(landmarks, eyeIndices) {
     try {
-        // Get the eye landmarks
-        const points = eyeIndices.map(index => landmarks[index]);
+        // Get the eye landmarks - adapting to new format
+        const points = eyeIndices.map(index => {
+            const point = landmarks.find(lm => lm.name === `face_landmark_${index}`);
+            return point ? [point.x, point.y] : [0, 0];
+        });
         
         // Calculate vertical distances (average of multiple points for robustness)
         const verticalDist1 = distance(points[1], points[7]);
@@ -248,18 +253,14 @@ function updatePupilVisualization() {
 // Main detection function with improved error handling and tracking
 async function detectFace(model) {
     try {
-        // Get predictions from the model
-        const predictions = await model.estimateFaces({
-            input: video,
-            returnTensors: false,
-            flipHorizontal: false,
-            predictIrises: true
-        });
+        // Get predictions from the model - updated API call
+        const predictions = await model.estimateFaces(video);
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         if (predictions.length > 0) {
-            const landmarks = predictions[0].scaledMesh;
+            // Updated to get landmarks from the new API structure
+            const landmarks = predictions[0].keypoints;
             
             // Calculate EAR for both eyes with improved method
             const leftEAR = calculateEAR(landmarks, LEFT_EYE_INDICES);
@@ -321,7 +322,8 @@ function drawFacialLandmarks(landmarks) {
 function drawEyeContour(landmarks, indices, isClosed) {
     ctx.beginPath();
     indices.forEach((index, i) => {
-        const [x, y] = landmarks[index];
+        const point = landmarks.find(lm => lm.name === `face_landmark_${index}`);
+        const [x, y] = point ? [point.x, point.y] : [0, 0];
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
     });
