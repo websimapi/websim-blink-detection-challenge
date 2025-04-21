@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blink Detection</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "@tensorflow/tfjs": "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js",
+        "@tensorflow-models/face-landmarks-detection": "https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection@1.0.2/dist/face-landmarks-detection.js"
+      }
+    }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Blink Detection Challenge</h1>
+        <p>Try not to blink! The application is watching your eyes...</p>
+        
+        <div class="video-container">
+            <video id="video" autoplay muted playsinline></video>
+            <canvas id="canvas"></canvas>
+            
+            <div class="status-overlay" id="statusOverlay">
+                <div class="eye-status left-eye" id="leftEyeStatus">
+                    <div class="pupil" id="leftPupil"></div>
+                </div>
+                <div class="eye-status right-eye" id="rightEyeStatus">
+                    <div class="pupil" id="rightPupil"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-container">
+            <div class="stat-box">
+                <h2>Left Eye Blinks</h2>
+                <div class="counter" id="leftCounter">0</div>
+            </div>
+            <div class="stat-box">
+                <h2>Both Eyes Blinks</h2>
+                <div class="counter" id="bothCounter">0</div>
+            </div>
+            <div class="stat-box">
+                <h2>Right Eye Blinks</h2>
+                <div class="counter" id="rightCounter">0</div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h2>Blink History</h2>
+            <div class="timeline" id="blinkTimeline"></div>
+        </div>
+        
+        <div class="metrics">
+            <div class="metric">
+                <h3>Total Blinks</h3>
+                <div id="totalBlinks">0</div>
+            </div>
+            <div class="metric">
+                <h3>Blink Rate</h3>
+                <div id="blinkRate">0 blinks/min</div>
+            </div>
+            <div class="metric">
+                <h3>Time Without Blinking</h3>
+                <div id="noBlinkTime">0s</div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="script.js"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
+
