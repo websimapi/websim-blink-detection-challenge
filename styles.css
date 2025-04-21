@@ -54,6 +54,7 @@ canvas {
     right: 10px;
     display: flex;
     gap: 15px;
+    z-index: 10;
 }
 
 .eye-status {
@@ -67,6 +68,7 @@ canvas {
     justify-content: center;
     position: relative;
     overflow: hidden;
+    transition: all 0.2s ease;
 }
 
 .pupil {
@@ -74,7 +76,24 @@ canvas {
     height: 20px;
     background-color: #2c3e50;
     border-radius: 50%;
-    transition: transform 0.2s ease, width 0.2s ease, height 0.2s ease;
+    transition: transform 0.15s ease, width 0.15s ease, height 0.15s ease;
+}
+
+/* Improved eye closed visualization */
+.eye-closed .pupil {
+    transform: scaleY(0.1) !important;
+    height: 2px;
+}
+
+/* Blink animation */
+.blink-animation {
+    animation: blink-effect 0.3s ease;
+}
+
+@keyframes blink-effect {
+    0% { transform: scaleY(1); }
+    50% { transform: scaleY(0.1); }
+    100% { transform: scaleY(1); }
 }
 
 .stats-container {
@@ -162,8 +181,41 @@ canvas {
     color: #3498db;
 }
 
-.eye-closed .pupil {
-    transform: scaleY(0.05);
-    height: 2px;
+/* Status message styling */
+#status-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(52, 152, 219, 0.9);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.5s ease;
 }
 
+#status-message.error {
+    background-color: rgba(231, 76, 60, 0.9);
+}
+
+#status-message.fade-out {
+    opacity: 0;
+}
+
+/* No face detected indicator */
+body.no-face-detected .video-container {
+    border: 3px solid #e74c3c;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stats-container, .metrics {
+        flex-direction: column;
+    }
+    
+    .stat-box, .metric {
+        margin: 10px 0;
+    }
+}
